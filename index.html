@@ -1838,7 +1838,7 @@ function askWhy() {
 }
 function paintWhy() {
   const cut = cut2Of();
-  document.querySelectorAll(".why button").forEach((b) => { const x = b.dataset.g, ng = cur.w2.includes(x) || cut.includes(x); b.classList.toggle("ng", ng); b.disabled = ng || cur.done; b.setAttribute("aria-label", G.GROUPS[x].name + (ng ? "（ちがう）" : "")); });
+  document.querySelectorAll(".why button").forEach((b) => { const x = b.dataset.g, ng = cur.w2.includes(x) || cut.includes(x); b.classList.toggle("ng", ng); b.disabled = ng || cur.done; b.setAttribute("aria-label", `${G.GROUPS[x].name}、${G.GROUPS[x].sub}${ng ? "（ちがう）" : ""}`); });
   const h = $("hint"); if (h) h.disabled = cur.done || cur.hints >= 2 || !!cur.h2 || !left2Of().length;
   $("hintbox").innerHTML = cur.h2 && !cur.done ? `<div class="hint" role="status">💡 ちがう目安を1つ消しました。</div>` : "";
 }

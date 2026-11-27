@@ -66,12 +66,12 @@
   const poolsOf = (mm, m2, h) => m3Of(mm, m2, h) / POOL_M3;
 
   // 杯数のまちがいの選び肢：答えを何倍かした数（丸めたあとで答えと重ならず、1以上のものだけ）
-  const FAR = [10, 0.1, 100, 0.01], NEAR = [3, 1 / 3, 2, 0.5];
+  const FAR = [10, 0.1, 100, 0.01], NEAR = [3, 1 / 3, 2, 0.5], N3 = [3, 1 / 3], N2 = [2, 0.5];
   function distract(R, x, lv) {
     const a = round2(x), ok = (f) => { const v = round2(x * f); return v >= 1 && v !== a; };
     const far = FAR.filter(ok), near = NEAR.filter(ok);
     if (lv === 0) return pickN(R, far, 2);
-    if (lv === 2) { const n1 = pickN(R, near, 1); return [...n1, ...pickN(R, far, 2)]; }
+    if (lv === 2) return [...pickN(R, N3.filter(ok), 1), ...pickN(R, N2.filter(ok), 1), ...pickN(R, far, 1)]; // むずかしいは3倍ちがい・2倍ちがいを1つずつと、10倍以上ちがいを1つ
     return pickN(R, [...far, ...near.slice(0, 2)], 3);
   }
   const PLACE = ["町", "住宅地", "地いき", "まち全体"];

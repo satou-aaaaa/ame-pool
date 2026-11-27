@@ -18,7 +18,7 @@ const check = (name, ok, detail = "") => results.push({ name, ok: !!ok, detail: 
 const firstClose = async (q) => { if (await q.locator("#howto[open]").count()) await q.click("#howto-ok"); if (await q.evaluate(() => !!(window.Core && Core.coach && Core.coach.active()))) { await q.evaluate(() => { Core.coach.leave(); scrollTo(0, 0); }); await q.waitForTimeout(100); } }; // はじめての練習の吹き出しをやめてホームへ（sync-template の migrateFirstQa が足した）
 const G = createRequire(import.meta.url)(path.join(root, "data.js"));
 
-const PINS = "p30_1k_1:0.0:0.1,p100_1k_1:1.1:0.3,r100:2:3.0.1,f1000:0:1.3.4,p50_10h_1:2.2:4.1.2,p100_50h_1:0.1:6.1.0,fkijun:2:1.2.4,r120:1:4.1.0;p100_1k_1:3.3:2.0,p80_1k_1:2.2:2.0,p40_0.5k_1:1.2:5.2.0,p40_10k_1:3.0:4.2.3,ftaki:2:1.3.2,r50:1:3.4.1,p20_50h_1:1.1:6.1.0,p30_10h_1:1.3:6.2.0;f1l:1:4.0,p20_1k_1:3.3:0.1,p80_5k_1:0.2:4.0.2,p10_10k_1:0.3:5.1.0,p30_3k_3:1.1:7.0.3,p20_1k_3:0.1:7.3.0,fkijun:1:0.3.1,p40_1k_3:0.0:4.2.1"; // 過去の日の問題の印（変わったら過去の日の問題が変わった印。種類・言い方は足すだけでも変わる）
+const PINS = "p30_1k_1:0.0:0.1,p100_1k_1:1.1:0.3,r100:2:3.0.1,f1000:0:1.3.4,p50_10h_1:2.2:4.6.2,p100_50h_1:0.1:5.7.0,fkijun:2:1.2.4,r120:1:4.1.0;p100_1k_1:3.3:2.0,p80_1k_1:2.2:2.0,p40_0.5k_1:1.2:5.2.0,p40_10k_1:3.0:4.2.3,ftaki:2:1.3.2,r50:1:3.4.1,p20_50h_1:1.1:5.6.0,p30_10h_1:1.3:5.7.0;f1l:1:4.0,p20_1k_1:3.3:0.1,p80_5k_1:0.2:4.0.2,p10_10k_1:0.3:5.1.0,p30_3k_3:1.1:4.7.0,p20_1k_3:0.1:4.7.0,fkijun:1:0.3.1,p40_1k_3:0.0:5.7.1"; // 過去の日の問題の印（変わったら過去の日の問題が変わった印。種類・言い方は足すだけでも変わる）
 // ---- 1. 問題の作り方（ブラウザを使わない）----
 // 検算の式（ゲームとは別に書いた。data.js の答えがこれと合うかを見る。根拠は共有フォルダ games/ame-pool-research.md）
 // プール：25m×15m×1m。水の量（L）＝ 雨量(mm) × 広さ(m²)（1m²に1mmで1L）。1m³＝1000L
@@ -47,7 +47,7 @@ check("検算：1km²に1時間100mm＝10万m³＝プール約270杯（核の一
         const vals = P.opts.map((o) => { const v = Number(o.replace(/[約杯,]/g, "").replace(/([\d.]+)万/, (_, a) => String(a * 10000))); return v / twoDigits(x); }).filter((r) => Math.abs(r - 1) > 1e-9);
         if (vals.some((r) => r < 0.009 || r > 101)) why.push("選び肢の倍率が大きすぎる");
         if (k.lv === 0 && vals.some((r) => r > 0.12 && r < 8)) why.push("やさしいのに近い数がまじる");
-        if (k.lv === 2 && !vals.some((r) => r > 0.2 && r < 5)) why.push("むずかしいのに近い数（2倍・3倍）が無い");
+        if (k.lv === 2 && !(vals.some((r) => (r > 2.5 && r < 3.5) || (r > 0.28 && r < 0.4)) && vals.some((r) => (r > 1.7 && r < 2.3) || (r > 0.43 && r < 0.6)) && vals.some((r) => r > 8 || r < 0.12))) why.push("むずかしいのに、3倍ちがい・2倍ちがい・10倍以上ちがいがそろわない");
         if (P.grp == null || G.GROUPS[P.grp].name !== word(Number(mm))) why.push("2段目が気象庁の表とちがう");
         if (!P.q.includes(`${mm}mm`) || !P.q.includes(k.area) || (Number(h) > 1 && !P.q.includes(`${h}時間`))) why.push("問いに雨量・広さ・時間が無い");
       } else if (/^r\d+$/.test(k.id)) {
@@ -105,7 +105,7 @@ check("検算：1km²に1時間100mm＝10万m³＝プール約270杯（核の一
 const html = readFileSync(path.join(root, "index.html"), "utf8"), gen = readFileSync(path.join(root, "data.js"), "utf8"), readme = readFileSync(path.join(root, "README.md"), "utf8");
 const ext = [...html.matchAll(/(?:src|href)="(https?:[^"]+)"/g)].map((m) => m[1]).filter((u) => !/^https:\/\/fonts\.googleapis\.com(\/|$)|^https:\/\/ko-fi\.com\/satouaaaaa$/.test(u));
 check("外から読むのは文字（Google Fonts）だけ。スクリプト・広告・解析を入れない（出典のリンクは押したときに開くだけ）", ext.length === 0 && ![...html.matchAll(/<script[^>]+src="([^"]+)"/g)].some((m) => /^https?:/.test(m[1])), ext.join(","));
-check("CSP で通信先を自分だけにしている", /connect-src 'self'/.test(html) && !/connect-src[^;"]*https/.test(html));
+check("CSP で通信先を自分だけにしている（connect-src は 'self' だけ）", ((html.match(/connect-src([^;"]*)/) || [])[1] || "").trim() === "'self'");
 check("Math.random は練習・とことんの種だけ（今日の5問・上級は日付の乱数。data.js には無い）", (html.match(/Math\.random/g) || []).length === 2 && !/Math\.random/.test(gen));
 check("乱数は sort の比較の中で引かない（ブラウザで引く回数が変わる）", !/\.sort\(\s*\([^)]*\)\s*=>[^\n;]*\b(R|rng|rand|Math\.random)\s*\(/.test(html + gen));
 { const inl = html.split("<script>").slice(1).map((x) => x.split("</" + "script>")[0]).join("\n"); // index.html の中の script も見る（nemuri-kotsu#1 で行の途中に // を入れて画面が動かなくなった）
@@ -222,7 +222,7 @@ try {
   check("シェアの文に答え・問題を出さない（印だけ）", /第\d+回/.test(share) && /🟢/.test(share) && !G.KINDS.some((k) => share.includes(k.name)) && !/m\/s|km/.test(share), share);
   check("まちがいのある日は Ko-fi の一言を出さない", await p.locator(".kofi").count() === 0);
   check("結果に「あと少しの実績」と、続けて遊ぶ・上級のボタン", await p.locator("#achnext").count() === 1 && await p.locator("#go-e").count() === 1 && await p.locator("#go-h").count() === 1);
-  check("見抜き帳に解いた種類が載る", Object.keys(s1.dex).length === 5);
+  check("まなび帳に解いた種類が載る", Object.keys(s1.dex).length === 5);
   await p.click("#back");
   check("今日を終えたら、ホームは「今日の結果を見る」と上級", (await p.textContent("#go-d")).includes("結果") && await p.locator("#go-h").count() === 1);
   // 上級：ヒントなし・3問
@@ -237,12 +237,12 @@ try {
   for (let i = 0; i < 5; i++) { await solve(p); await p.click("#next"); }
   await p.waitForTimeout(150);
   const after = await mem(p);
-  check("練習は今日の記録を増やさない（見抜き帳の数はふえる）", JSON.stringify(after.days) === JSON.stringify(before.days) && Object.values(after.dex).reduce((a, b) => a + b) === Object.values(before.dex).reduce((a, b) => a + b) + 5);
-  // 見抜き帳からその手口だけで練習
+  check("練習は今日の記録を増やさない（まなび帳の数はふえる）", JSON.stringify(after.days) === JSON.stringify(before.days) && Object.values(after.dex).reduce((a, b) => a + b) === Object.values(before.dex).reduce((a, b) => a + b) + 5);
+  // まなび帳からその種類だけで練習
   await p.click("#back"); await p.click("#go-dex");
   const firstKind = await p.getAttribute(".book button", "data-k");
   await p.click(".book button");
-  check("見抜き帳の手口を押すと、その手口だけで練習", (await p.evaluate(() => __nm.load().runs.p.list)).every((t) => t.startsWith(firstKind + "|")));
+  { const pl = await p.evaluate(() => __nm.load().runs.p.list); check("まなび帳の種類を押すと、その種類だけで練習（1問以上）", firstKind && pl.length >= 1 && pl.every((t) => t.startsWith(firstKind + "|")), pl.join(",")); }
   // とことん：まちがえてもヒントを使っても続き、「ここで降りる」で終わる（game-dev.md F1）
   await p.click("#back"); await p.click("#go-e");
   check("とことんは60問の並びから・ライフ（🌸・🎫）が無い", (await p.evaluate(() => __nm.load().runs.e.list.length)) === 60 && !("life" in await p.evaluate(() => __nm.load().runs.e)) && await p.locator("#quit").count() === 1);
